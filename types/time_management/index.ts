@@ -8,14 +8,8 @@ export type WorkItem = {
     time: number;
 }
 
-export type WorkDate = {
-    day: number;
-    month: number;
-    year: number;
-}
-
 export type WorkDay = {
-    date: WorkDate;
+    date: Date;
     queue: WorkItem[];
     allowedMana: number;
 }

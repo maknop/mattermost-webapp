@@ -4,8 +4,8 @@
 import {combineReducers} from 'redux';
 
 import TimeManagementTypes from 'utils/time_management/action_types';
-import {workDateToString, dateToWorkDateString} from 'utils/time_management/utils';
-import {WorkDate, WorkItem} from 'types/time_management';
+import {dateToWorkDateString} from 'utils/time_management/utils';
+import {WorkItem} from 'types/time_management';
 
 import {UserTypes} from 'mattermost-redux/action_types';
 import {GenericAction} from 'mattermost-redux/types/actions';
@@ -23,19 +23,31 @@ const testWorkItemsByDay = {
         },
         {
             title: 'Call home base at Houston',
-            time: 30,
-        },
-        {
-            title: 'Take a break',
-            time: 30,
-        },
-        {
-            title: 'Take some dirt samples',
             time: 60,
         },
         {
+            title: 'Eat a uranium isotope for lunch',
+            time: 60,
+        },
+        {
+            title: 'Take some dirt samples',
+            time: 120,
+        },
+        {
             title: 'Feel lonely',
-            time: 15,
+            time: 30,
+        },
+        {
+            title: 'Charge via solar panels',
+            time: 60,
+        },
+        {
+            title: 'Eat another uranium isotope for dinner',
+            time: 30,
+        },
+        {
+            title: 'Systems shut down for the night',
+            time: 30,
         },
     ],
 };
@@ -43,12 +55,12 @@ const testWorkItemsByDay = {
 export function workItemsByDay(state: Dictionary<WorkItem[]> = testWorkItemsByDay, action: GenericAction) {
     switch (action.type) {
     case TimeManagementTypes.RECEIVED_WORK_ITEM: {
-        const date = action.date as WorkDate;
-        const stringDate = workDateToString(date);
-        const item = action.item as WorkItem;
+        const date = action.date as Date;
+        const stringDate = dateToWorkDateString(date);
+        const task = action.task as WorkItem;
 
         const day = state[stringDate] || [];
-        day.push(item);
+        day.push(task);
 
         return {...state, [stringDate]: day};
     }

@@ -7,10 +7,11 @@ import {Calendar, momentLocalizer, Views} from 'react-big-calendar';
 import {useSelector} from 'react-redux';
 import moment from 'moment';
 
-import 'react-big-calendar/lib/css/react-big-calendar.css';
-
 import {dateToWorkDateString} from 'utils/time_management/utils';
 import {TimeState, WorkItem} from 'types/time_management';
+
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+import './day.scss';
 
 const localizer = momentLocalizer(moment);
 
@@ -28,6 +29,7 @@ const Body = styled.div`
 `;
 
 const dayStart = 9;
+const dayEnd = 17;
 
 function scheduleWorkItemsForDay(tasks: WorkItem[]) {
     let cursor = new Date();
@@ -63,6 +65,11 @@ const Day = () => {
                     endAccessor='end'
                     defaultView={Views.DAY}
                     views={[Views.DAY]}
+                    eventPropGetter={(e) => {
+                        const endOfDay = new Date();
+                        endOfDay.setHours(dayEnd, 0, 0, 0);
+                        return e.end > endOfDay ? {className: 'WorkDayEvent__overtime'} : {className: 'WorkDayEvent'};
+                    }}
                 />
             </Body>
         </Container>
