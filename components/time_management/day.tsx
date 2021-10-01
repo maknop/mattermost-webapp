@@ -16,13 +16,20 @@ import './day.scss';
 const localizer = momentLocalizer(moment);
 
 const Container = styled.div`
+    flex: 2;
+    margin: 0px 10px;
+    padding: 24px;
+    background-color: #FFFFFF;
+    border-radius: 8px;
+    align-self: flex-start;
 `;
 
 const Title = styled.div`
     font-family: Metropolis;
     font-size: 18px;
     line-height: 24px
-    margin-bottom: 14px;
+    margin-bottom: 20px;
+    font-weight: 600;
 `;
 
 const Body = styled.div`
@@ -68,7 +75,7 @@ const Day = () => {
                     eventPropGetter={(e) => {
                         const endOfDay = new Date();
                         endOfDay.setHours(dayEnd, 0, 0, 0);
-                        return e.end > endOfDay ? {className: 'WorkDayEvent__overtime'} : {className: 'WorkDayEvent'};
+                        return e.end > endOfDay ? {className: 'WorkDayEvent WorkDayEvent__overtime'} : {className: 'WorkDayEvent'};
                     }}
                 />
             </Body>

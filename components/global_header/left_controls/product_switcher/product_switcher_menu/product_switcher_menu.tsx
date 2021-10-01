@@ -107,6 +107,18 @@ class ProductSwitcherMenu extends React.PureComponent<PropsWithIntl> {
                             />
                         }
                     />
+                    <Menu.ItemLink
+                        id='tasks'
+                        show={isMessaging}
+                        to={'/time'}
+                        text={formatMessage({id: 'navbar_dropdown.tasks', defaultMessage: 'Tasks'})}
+                        icon={
+                            <Icon
+                                size={16}
+                                glyph={'webhook-incoming'}
+                            />
+                        }
+                    />
                     <TeamPermissionGate
                         teamId={this.props.teamId}
                         permissions={[Permissions.SYSCONSOLE_WRITE_PLUGINS]}

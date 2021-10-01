@@ -2,12 +2,16 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
+import {useDispatch} from 'react-redux';
 import {Tooltip} from 'react-bootstrap';
 import {FormattedMessage} from 'react-intl';
 
 import CheckmarkIcon from 'components/widgets/icons/checkmark_icon';
 import OverlayTrigger from 'components/overlay_trigger';
-import Constants from 'utils/constants';
+import AddTaskModal from 'components/time_management/add_task_modal';
+
+import {openModal} from 'actions/views/modals';
+import Constants, {ModalIdentifiers} from 'utils/constants';
 
 type Props = {
     message: string;
@@ -15,8 +19,13 @@ type Props = {
 
 const PostTaskIcon = (props: Props) => {
     const {message} = props;
+    const dispatch = useDispatch();
     const handlePress = () => {
-        console.log(message);
+        dispatch(openModal({
+            modalId: ModalIdentifiers.ADD_TASK_MODAL,
+            dialogType: AddTaskModal,
+            dialogProps: {task: message, currentDate: new Date()},
+        }));
     };
 
     return (

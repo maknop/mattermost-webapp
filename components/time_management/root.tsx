@@ -7,6 +7,7 @@ import {useIntl} from 'react-intl';
 import {Switch, Route, useRouteMatch} from 'react-router-dom';
 
 import Day from './day';
+import Unscheduled from './unscheduled';
 
 const Header = styled.div`
     display: flex;
@@ -44,9 +45,10 @@ const Content = styled.div`
 `;
 
 const Body = styled.div`
-    padding: 24px;
-    background-color: #FFFFFF;
-    border-radius: 8px;
+`;
+
+const Home = styled.div`
+    display: flex;
 `;
 
 const Root = () => {
@@ -67,7 +69,10 @@ const Root = () => {
                 <Body>
                     <Switch>
                         <Route path={`${match.url}/`}>
-                            <Day/>
+                            <Home>
+                                <Day/>
+                                <Unscheduled/>
+                            </Home>
                         </Route>
                     </Switch>
                 </Body>

@@ -22,10 +22,6 @@ const testWorkItemsByDay = {
             time: 120,
         },
         {
-            title: 'Call home base at Houston',
-            time: 60,
-        },
-        {
             title: 'Eat a uranium isotope for lunch',
             time: 60,
         },
@@ -38,10 +34,6 @@ const testWorkItemsByDay = {
             time: 30,
         },
         {
-            title: 'Charge via solar panels',
-            time: 60,
-        },
-        {
             title: 'Eat another uranium isotope for dinner',
             time: 30,
         },
@@ -52,14 +44,28 @@ const testWorkItemsByDay = {
     ],
 };
 
+const testUnscheduledWorkItems = [
+    {
+        title: 'Charge via solar panels',
+        time: 60,
+    },
+    {
+        title: 'Call home base at Houston',
+        time: 60,
+    },
+];
+
 export function workItemsByDay(state: Dictionary<WorkItem[]> = testWorkItemsByDay, action: GenericAction) {
     switch (action.type) {
     case TimeManagementTypes.RECEIVED_WORK_ITEM: {
         const date = action.date as Date;
+        if (!date) {
+            return state;
+        }
         const stringDate = dateToWorkDateString(date);
         const task = action.task as WorkItem;
 
-        const day = state[stringDate] || [];
+        const day = [...state[stringDate]] || [];
         day.push(task);
 
         return {...state, [stringDate]: day};
@@ -71,6 +77,24 @@ export function workItemsByDay(state: Dictionary<WorkItem[]> = testWorkItemsByDa
     }
 }
 
+export function unscheduledWorkItems(state: WorkItem[] = testUnscheduledWorkItems, action: GenericAction) {
+    switch (action.type) {
+    case TimeManagementTypes.RECEIVED_WORK_ITEM: {
+        const date = action.date;
+        if (date) {
+            return state;
+        }
+        const task = action.task as WorkItem;
+        return [...state, task];
+    }
+    case UserTypes.LOGOUT_SUCCESS:
+        return {};
+    default:
+        return state;
+    }
+}
+
 export default combineReducers({
     workItemsByDay,
+    unscheduledWorkItems,
 });

@@ -17,5 +17,6 @@ export type WorkDay = {
 export type TimeState = {
     time: {
         workItemsByDay: Dictionary<WorkItem[]>;
+        unscheduledWorkItems: WorkItem[];
     };
 };
