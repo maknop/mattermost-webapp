@@ -28,7 +28,7 @@ const CalendarTitle = styled.div`
 const Body = styled.div`
     display: flex;
     width: 900px;
-    height: 2000px;
+    height: 1200px;
     flex-direction: column;
     position: relative;
 `;
@@ -53,7 +53,7 @@ const HourRow = styled.div`
     display: flex;
     flex-direction: row;
     flex: 1;
-    align-self: flex-start;
+    min-height: 120px;
     max-height: 120px;
     width: 100%;
 `;
@@ -88,13 +88,22 @@ const Block = styled.div`
 
     font-family: Open Sans;
     font-style: normal;
-    font-weight: 600;
+    font-weight: 400;
     font-size: 14px;
     line-height: 20px;
     color: #3D3C40;
 
     margin-left: 10px;
     margin-top: 2px;
+    position: absolute;
+    width: 95%;
+
+    display: flex;
+    flex-direction: column;
+`;
+
+const Task = styled.div`
+    margin: 15px;
 `;
 
 type Props = {
@@ -164,7 +173,15 @@ const Calendar = (props: Props) => {
                                     top: `${pixelPerMinute * minutesFromDayStart}px`,
                                     height: `${(pixelPerMinute * totalMinutes) - 4}px`,
                                 }}
-                            />
+                            >
+                                {block.queue.map((task) => {
+                                    return (
+                                        <Task>
+                                            {task.title}
+                                        </Task>
+                                    );
+                                })}
+                            </Block>
                         );
                     })}
                 </BlockContainer>
