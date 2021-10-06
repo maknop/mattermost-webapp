@@ -8,15 +8,15 @@ export type WorkItem = {
     time: number;
 }
 
-export type WorkDay = {
-    date: Date;
+export type WorkBlock = {
+    start: Date;
+    minTime: number;
     queue: WorkItem[];
-    allowedMana: number;
-}
+};
 
 export type TimeState = {
     time: {
-        workItemsByDay: Dictionary<WorkItem[]>;
+        workBlocksByDay: Dictionary<WorkBlock[]>;
         unscheduledWorkItems: WorkItem[];
     };
 };

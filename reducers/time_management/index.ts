@@ -11,35 +11,49 @@ import {UserTypes} from 'mattermost-redux/action_types';
 import {GenericAction} from 'mattermost-redux/types/actions';
 import {Dictionary} from 'mattermost-redux/types/utilities';
 
+const today = new Date();
+const getTodayAtHour = (hour: number, min = 0) => {
+    const newDate = new Date(today);
+    newDate.setHours(hour, min, 0, 0);
+    return newDate;
+};
+
 const testWorkItemsByDay = {
     [dateToWorkDateString(new Date())]: [
         {
-            title: 'Morning systems check',
-            time: 30,
+            start: getTodayAtHour(9),
+            queue: [{
+                title: 'Morning systems check',
+                time: 30,
+            }],
         },
         {
-            title: 'Visit Mons Olympus',
-            time: 120,
+            start: getTodayAtHour(10),
+            queue: [{
+                title: 'Visit Mons Olympus',
+                time: 120,
+            }],
         },
         {
-            title: 'Eat a uranium isotope for lunch',
-            time: 60,
+            start: getTodayAtHour(12),
+            queue: [{
+                title: 'Eat a uranium isotope for lunch',
+                time: 60,
+            }],
         },
         {
-            title: 'Take some dirt samples',
-            time: 120,
+            start: getTodayAtHour(14, 30),
+            queue: [{
+                title: 'Take some dirt samples',
+                time: 120,
+            }],
         },
         {
-            title: 'Feel lonely',
-            time: 30,
-        },
-        {
-            title: 'Eat another uranium isotope for dinner',
-            time: 30,
-        },
-        {
-            title: 'Systems shut down for the night',
-            time: 30,
+            start: getTodayAtHour(16, 30),
+            queue: [{
+                title: 'Feel lonely',
+                time: 30,
+            }],
         },
     ],
 };
@@ -55,7 +69,7 @@ const testUnscheduledWorkItems = [
     },
 ];
 
-export function workItemsByDay(state: Dictionary<WorkItem[]> = testWorkItemsByDay, action: GenericAction) {
+export function workBlocksByDay(state: Dictionary<WorkBlock[]> = testWorkItemsByDay, action: GenericAction) {
     switch (action.type) {
     case TimeManagementTypes.RECEIVED_WORK_ITEM: {
         const date = action.date as Date;
@@ -95,6 +109,6 @@ export function unscheduledWorkItems(state: WorkItem[] = testUnscheduledWorkItem
 }
 
 export default combineReducers({
-    workItemsByDay,
+    workBlocksByDay,
     unscheduledWorkItems,
 });
