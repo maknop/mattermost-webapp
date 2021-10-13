@@ -9,6 +9,7 @@ export type WorkItem = {
 }
 
 export type WorkBlock = {
+    id: string;
     start: Date;
     minTime: number;
     queue: WorkItem[];

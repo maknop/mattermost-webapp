@@ -21,6 +21,7 @@ const getTodayAtHour = (hour: number, min = 0) => {
 const testWorkItemsByDay = {
     [dateToWorkDateString(new Date())]: [
         {
+            id: '1',
             start: getTodayAtHour(9),
             queue: [{
                 title: 'Morning systems check',
@@ -28,6 +29,7 @@ const testWorkItemsByDay = {
             }],
         },
         {
+            id: '2',
             start: getTodayAtHour(10),
             queue: [{
                 title: 'Visit Mons Olympus',
@@ -35,6 +37,7 @@ const testWorkItemsByDay = {
             }],
         },
         {
+            id: '3',
             start: getTodayAtHour(12),
             queue: [{
                 title: 'Eat a uranium isotope for lunch',
@@ -42,6 +45,7 @@ const testWorkItemsByDay = {
             }],
         },
         {
+            id: '4',
             start: getTodayAtHour(14, 30),
             queue: [{
                 title: 'Take some dirt samples',
@@ -49,6 +53,7 @@ const testWorkItemsByDay = {
             }],
         },
         {
+            id: '5',
             start: getTodayAtHour(16, 30),
             queue: [{
                 title: 'Feel lonely',

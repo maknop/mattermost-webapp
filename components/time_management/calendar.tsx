@@ -1,12 +1,18 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React from 'react';
+import React, {useState} from 'react';
 import styled from 'styled-components';
 import moment from 'moment';
 import {useIntl} from 'react-intl';
+import {DndProvider} from 'react-dnd';
+import {HTML5Backend} from 'react-dnd-html5-backend';
 
 import {WorkBlock} from 'types/time_management';
+import {isBlockStartTimeEqual} from 'utils/time_management/utils';
+
+import Block from './block';
+import Hour from './hour';
 
 const CalendarContainer = styled.div`
     display: flex;
@@ -49,26 +55,6 @@ const HourContainer = styled.div`
     width: 100%;
 `;
 
-const HourRow = styled.div`
-    display: flex;
-    flex-direction: row;
-    flex: 1;
-    min-height: 120px;
-    max-height: 120px;
-    width: 100%;
-`;
-
-const Hour = styled.div`
-    flex: 1;
-    max-width: 65px;
-    margin-top: -11px;
-`;
-
-const HourContent = styled.div`
-    flex: 1;
-    border-top: 1px solid rgba(61, 60, 64, 0.16);;
-`;
-
 const BlockBuffer = styled.div`
     flex: 1;
     max-width: 65px;
@@ -76,34 +62,8 @@ const BlockBuffer = styled.div`
 
 const BlockContainer = styled.div`
     flex: 1;
+    left: 65px;
     position: relative;
-`;
-
-const Block = styled.div`
-    background: linear-gradient(0deg, rgba(63, 67, 80, 0.04), rgba(63, 67, 80, 0.04)), #FFFFFF;
-    border: 1px solid rgba(61, 60, 64, 0.16) !important;
-    box-sizing: border-box;
-    box-shadow: 0px 6px 14px rgba(0, 0, 0, 0.12);
-    border-radius: 4px;
-
-    font-family: Open Sans;
-    font-style: normal;
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 20px;
-    color: #3D3C40;
-
-    margin-left: 10px;
-    margin-top: 2px;
-    position: absolute;
-    width: 95%;
-
-    display: flex;
-    flex-direction: column;
-`;
-
-const Task = styled.div`
-    margin: 15px;
 `;
 
 type Props = {
@@ -119,33 +79,39 @@ min.setHours(8, 0, 0, 0);
 const max = new Date();
 max.setHours(19, 0, 0, 0);
 
-const pixelPerMinute = 2;
-
 const defaultProps = {
     dayStart: min,
     dayEnd: max,
 };
 
 const Calendar = (props: Props) => {
-    const {date, dayStart, dayEnd, blocks} = props;
+    const {date, dayStart, dayEnd, blocks: defaultBlocks} = props;
     const {formatDate} = useIntl();
+    const [blocks, setBlocks] = useState(defaultBlocks);
 
     let workingHours = dayEnd.getHours() - dayStart.getHours();
     if (workingHours <= 0) {
         workingHours = 8;
     }
 
+    const moveBlock = (time: Date, block: WorkBlock) => {
+        const blockIndex = blocks.findIndex((b) => block.id === b.id);
+        const newBlocks = [...blocks].splice(blockIndex, 1);
+        const newBlock = {...block, start: time};
+        newBlocks.push(newBlock);
+        setBlocks(newBlocks);
+    };
+
     const renderHours = () => {
         const hours = [];
         let cursor = dayStart;
         while (dayEnd.getHours() - cursor.getHours() > 0) {
             hours.push(
-                <HourRow>
-                    <Hour>
-                        {moment(cursor).format('h:00a')}
-                    </Hour>
-                    <HourContent/>
-                </HourRow>,
+                <Hour
+                    key={cursor.toDateString()}
+                    date={cursor}
+                    moveBlock={moveBlock}
+                />,
             );
             cursor = moment(cursor).add(1, 'hours').toDate();
         }
@@ -153,6 +119,13 @@ const Calendar = (props: Props) => {
             <BodyContainer>
                 <HourContainer>
                     {hours}
+                    {blocks.map((block) => (
+                        <Block
+                            key={block.id}
+                            block={block}
+                            dayStart={dayStart}
+                        />),
+                    )}
                 </HourContainer>
             </BodyContainer>
         );
@@ -163,42 +136,29 @@ const Calendar = (props: Props) => {
             <BodyContainer>
                 <BlockBuffer/>
                 <BlockContainer>
-                    {blocks.map((block) => {
-                        const totalMinutes = block.queue.reduce((a, b) => a + b.time, 0);
-                        const minutesFromDayStart = moment(block.start).diff(dayStart, 'minutes');
-                        return (
-                            <Block
-                                key={`block_${block.start.toDateString()}`}
-                                style={{
-                                    top: `${pixelPerMinute * minutesFromDayStart}px`,
-                                    height: `${(pixelPerMinute * totalMinutes) - 4}px`,
-                                }}
-                            >
-                                {block.queue.map((task) => {
-                                    return (
-                                        <Task>
-                                            {task.title}
-                                        </Task>
-                                    );
-                                })}
-                            </Block>
-                        );
-                    })}
+                    {blocks.map((block) => (
+                        <Block
+                            key={block.id}
+                            block={block}
+                            dayStart={dayStart}
+                        />),
+                    )}
                 </BlockContainer>
             </BodyContainer>
         );
     };
 
     return (
-        <CalendarContainer>
-            <CalendarTitle>
-                {formatDate(date, {month: 'long', weekday: 'long', day: 'numeric'})}
-            </CalendarTitle>
-            <Body>
-                {renderHours()}
-                {renderBlocks()}
-            </Body>
-        </CalendarContainer>
+        <DndProvider backend={HTML5Backend}>
+            <CalendarContainer>
+                <CalendarTitle>
+                    {formatDate(date, {month: 'long', weekday: 'long', day: 'numeric'})}
+                </CalendarTitle>
+                <Body>
+                    {renderHours()}
+                </Body>
+            </CalendarContainer>
+        </DndProvider>
     );
 };
 
