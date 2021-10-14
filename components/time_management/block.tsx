@@ -7,6 +7,7 @@ import moment from 'moment';
 import {useDrag} from 'react-dnd';
 
 import {PixelPerMinute, DragTypes} from 'utils/time_management/constants';
+import {calculateMinutesInBlock} from 'utils/time_management/utils';
 import {WorkBlock} from 'types/time_management';
 
 const Container = styled.div`
@@ -58,7 +59,7 @@ const Block = (props: Props) => {
     });
     const opacity = isDragging ? 0 : 1;
 
-    const totalMinutes = block.queue.reduce((a, b) => a + b.time, 0);
+    const totalMinutes = calculateMinutesInBlock(block);
     const minutesFromDayStart = moment(block.start).diff(dayStart, 'minutes');
 
     drag(ref);

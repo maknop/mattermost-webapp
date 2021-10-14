@@ -1,15 +1,15 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
 import styled from 'styled-components';
 import moment from 'moment';
 import {useIntl} from 'react-intl';
-import {DndProvider} from 'react-dnd';
-import {HTML5Backend} from 'react-dnd-html5-backend';
+import {useDrop} from 'react-dnd';
 
 import {WorkBlock} from 'types/time_management';
-import {isBlockStartTimeEqual} from 'utils/time_management/utils';
+import {PixelPerMinute, DragTypes} from 'utils/time_management/constants';
+import {findAvailableSlot} from 'utils/time_management/utils';
 
 import Block from './block';
 import Hour from './hour';
@@ -55,17 +55,6 @@ const HourContainer = styled.div`
     width: 100%;
 `;
 
-const BlockBuffer = styled.div`
-    flex: 1;
-    max-width: 65px;
-`;
-
-const BlockContainer = styled.div`
-    flex: 1;
-    left: 65px;
-    position: relative;
-`;
-
 type Props = {
     date: Date;
     blocks: WorkBlock[];
@@ -96,11 +85,68 @@ const Calendar = (props: Props) => {
 
     const moveBlock = (time: Date, block: WorkBlock) => {
         const blockIndex = blocks.findIndex((b) => block.id === b.id);
-        const newBlocks = [...blocks].splice(blockIndex, 1);
+        if (blockIndex < 0) {
+            return;
+        }
+
+        const newBlocks = [...blocks];
         const newBlock = {...block, start: time};
-        newBlocks.push(newBlock);
+        newBlocks.splice(blockIndex, 1);
+
+        const newBlocksDates = newBlocks.map((block) => block.start);
+        const indexOfBlockAtSameTime = newBlocksDates.findIndex((d) => d.getTime() === time.getTime());
+        if (indexOfBlockAtSameTime >= 0) {
+            const blockAtSameTime = newBlocks[indexOfBlockAtSameTime];
+            newBlocks.splice(indexOfBlockAtSameTime, 1);
+            newBlocks.push(newBlock);
+            const newStart = findAvailableSlot(blockAtSameTime, newBlocks);
+            const newBlockAtSameTime = {...blockAtSameTime, start: newStart};
+            newBlocks.push(newBlockAtSameTime);
+        } else {
+            newBlocks.push(newBlock);
+        }
+
         setBlocks(newBlocks);
     };
+
+    const ref = useRef(null);
+
+    const [{handlerId}, drop] = useDrop({
+        accept: DragTypes.BLOCK,
+        collect(monitor) {
+            return {
+                handlerId: monitor.getHandlerId(),
+            };
+        },
+        drop(item: any, monitor) {
+            if (!ref.current) {
+                return;
+            }
+
+            const hoverBoundingRect = ref.current?.getBoundingClientRect();
+            const clientOffset = monitor.getClientOffset();
+            if (clientOffset == null) {
+                return;
+            }
+
+            const offsetY = clientOffset.y - hoverBoundingRect.top;
+            if (offsetY < 0) {
+                return;
+            }
+
+            const totalMinutesFromStart = offsetY / PixelPerMinute;
+            const hoursFromStart = Math.floor(totalMinutesFromStart / 60);
+            const hours = dayStart.getHours() + hoursFromStart;
+
+            const minutesFromStart = totalMinutesFromStart % 60;
+            const halfHour = (Math.floor(minutesFromStart / 30) * 30) % 60;
+
+            const newDate = new Date(date);
+            newDate.setHours(hours, halfHour, 0, 0);
+
+            moveBlock(newDate, item.block);
+        },
+    });
 
     const renderHours = () => {
         const hours = [];
@@ -110,13 +156,15 @@ const Calendar = (props: Props) => {
                 <Hour
                     key={cursor.toDateString()}
                     date={cursor}
-                    moveBlock={moveBlock}
                 />,
             );
             cursor = moment(cursor).add(1, 'hours').toDate();
         }
         return (
-            <BodyContainer>
+            <BodyContainer
+                ref={ref}
+                data-handler-id={handlerId}
+            >
                 <HourContainer>
                     {hours}
                     {blocks.map((block) => (
@@ -131,34 +179,16 @@ const Calendar = (props: Props) => {
         );
     };
 
-    const renderBlocks = () => {
-        return (
-            <BodyContainer>
-                <BlockBuffer/>
-                <BlockContainer>
-                    {blocks.map((block) => (
-                        <Block
-                            key={block.id}
-                            block={block}
-                            dayStart={dayStart}
-                        />),
-                    )}
-                </BlockContainer>
-            </BodyContainer>
-        );
-    };
-
+    drop(ref);
     return (
-        <DndProvider backend={HTML5Backend}>
-            <CalendarContainer>
-                <CalendarTitle>
-                    {formatDate(date, {month: 'long', weekday: 'long', day: 'numeric'})}
-                </CalendarTitle>
-                <Body>
-                    {renderHours()}
-                </Body>
-            </CalendarContainer>
-        </DndProvider>
+        <CalendarContainer>
+            <CalendarTitle>
+                {formatDate(date, {month: 'long', weekday: 'long', day: 'numeric'})}
+            </CalendarTitle>
+            <Body>
+                {renderHours()}
+            </Body>
+        </CalendarContainer>
     );
 };
 
