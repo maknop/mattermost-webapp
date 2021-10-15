@@ -23,6 +23,7 @@ import {
 } from 'utils/constants';
 
 import StartTrialModal from 'components/start_trial_modal';
+import TrialBenefitsModal from 'components/trial_benefits_modal';
 
 import {trackEvent} from 'actions/telemetry_actions';
 
@@ -35,7 +36,7 @@ const ShowStartTrialModal = () => {
     const dispatch = useDispatch<DispatchFunc>();
     const getCategory = makeGetCategory();
 
-    const userThreshold = 10;
+    const userThreshold = 100;
     const analytics = useSelector((state: GlobalState) => state.entities.admin.analytics);
     const installationDate = useSelector((state: GlobalState) => getConfig(state).InstallationDate);
     const currentUser = useSelector((state: GlobalState) => getCurrentUser(state));
@@ -55,6 +56,12 @@ const ShowStartTrialModal = () => {
             },
         ]));
     };
+
+    dispatch(openModal({
+        modalId: ModalIdentifiers.START_TRIAL_MODAL,
+        dialogType: TrialBenefitsModal,
+        dialogProps: {onClose: handleOnClose},
+    }));
 
     useEffect(() => {
         if (!analytics) {

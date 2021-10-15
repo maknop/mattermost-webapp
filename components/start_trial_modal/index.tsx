@@ -10,12 +10,13 @@ import {useHistory} from 'react-router-dom';
 import {isModalOpen} from 'selectors/views/modals';
 import {GlobalState} from 'mattermost-redux/types/store';
 import {ModalIdentifiers} from 'utils/constants';
-import {closeModal} from 'actions/views/modals';
+import {closeModal, openModal} from 'actions/views/modals';
 import {getLicenseConfig} from 'mattermost-redux/actions/general';
 import {requestTrialLicense} from 'actions/admin_actions';
 import {getStandardAnalytics} from 'mattermost-redux/actions/admin';
 import {DispatchFunc} from 'mattermost-redux/types/actions';
 import FormattedMarkdownMessage from 'components/formatted_markdown_message';
+import TrialBenefitsModal from 'components/trial_benefits_modal';
 
 import StartTrialModalSvg from './start_trial_modal_svg';
 
@@ -45,22 +46,31 @@ function StartTrialModal(props: Props): JSX.Element | null {
     const show = useSelector((state: GlobalState) => isModalOpen(state, ModalIdentifiers.START_TRIAL_MODAL));
     const stats = useSelector((state: GlobalState) => state.entities.admin.analytics);
 
-    const requestLicense = async () => {
-        setLoadStatus(TrialLoadStatus.Started);
-        let users = 0;
-        if (stats && (typeof stats.TOTAL_USERS === 'number')) {
-            users = stats.TOTAL_USERS;
-        }
-        const requestedUsers = Math.max(users, 30);
-        const {error} = await dispatch(requestTrialLicense(requestedUsers, true, true, 'license'));
-        if (error) {
-            setLoadStatus(TrialLoadStatus.Failed);
-        }
+    const openTrialBenefitsModal = () => {
+        dispatch(openModal({
+            modalId: ModalIdentifiers.TRIAL_BENEFITS_MODAL,
+            dialogType: TrialBenefitsModal,
+        }));
+    };
 
-        setLoadStatus(TrialLoadStatus.Success);
-        await dispatch(getLicenseConfig());
+    const requestLicense = async () => {
+        // setLoadStatus(TrialLoadStatus.Started);
+        // let users = 0;
+        // if (stats && (typeof stats.TOTAL_USERS === 'number')) {
+        //     users = stats.TOTAL_USERS;
+        // }
+        // const requestedUsers = Math.max(users, 30);
+        // const {error} = await dispatch(requestTrialLicense(requestedUsers, true, true, 'license'));
+        // if (error) {
+        //     setLoadStatus(TrialLoadStatus.Failed);
+        // }
+
+        // setLoadStatus(TrialLoadStatus.Success);
+        // await dispatch(getLicenseConfig());
         dispatch(closeModal(ModalIdentifiers.START_TRIAL_MODAL));
-        history.push('/admin_console/about/license');
+        openTrialBenefitsModal();
+
+        // history.push('/admin_console/about/license');
     };
 
     const btnText = (status: TrialLoadStatus): string => {
